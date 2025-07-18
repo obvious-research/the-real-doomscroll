@@ -4,8 +4,8 @@ Simple Master Coordinator for The Real Doomscroll
 By Obvious Research
 
 Now always serving an aiohttp endpoint at /next-video
-which returns JSON metadata + video name, and a separate
-/videos/{video_name} endpoint for streaming the video.
+which returns JSON metadata + folder name, and a separate
+/videos/{folder_name} endpoint for streaming the video.mp4.
 """
 
 import os
@@ -17,19 +17,19 @@ from aiohttp import web
 # ───────────────────────────────────────────────────────────────
 # CONFIGURATION: point this at your root directory of video subfolders
 # ─────────────────────────────────────────────────────────────────
-VIDEO_ROOT = "/workspace/videos"  # ← adjust this!
+VIDEO_ROOT = "/workspace/the-real-doomscroll/back/LTX-Video/generated_content"
 CURRENT_VIDEO = 0  # index into sorted subdirs
 
 
 async def handle_next_video(request):
     """
     aiohttp handler for GET /next-video.
-    Returns JSON containing the metadata + video filename.
+    Returns JSON containing the folder name + metadata.json contents.
     Increments CURRENT_VIDEO each request (wraps around).
     """
     global CURRENT_VIDEO
 
-    # list and sort subdirs
+    # list and sort subdirs (e.g., video_001, video_002, ...)
     try:
         subdirs = sorted(
             d for d in os.listdir(VIDEO_ROOT)
@@ -41,25 +41,16 @@ async def handle_next_video(request):
     if not subdirs:
         return web.json_response({"success": False, "message": "No video subfolders"}, status=404)
 
-    # wrap CURRENT_VIDEO in range
+    # choose current index, wrap around
     idx = CURRENT_VIDEO % len(subdirs)
     chosen = subdirs[idx]
     folder = os.path.join(VIDEO_ROOT, chosen)
 
-    # locate metadata.json and video file
-    meta_path = next(
-        (os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(".json")),
-        None
-    )
-    vid_filename = next(
-        (f for f in os.listdir(folder)
-         if f.lower().endswith((".mp4", ".mov", ".avi", ".mkv"))),
-        None
-    )
-
-    if not meta_path or not vid_filename:
+    # locate metadata.json
+    meta_path = os.path.join(folder, "metadata.json")
+    if not os.path.isfile(meta_path):
         return web.json_response(
-            {"success": False, "message": "Missing metadata or video in folder"},
+            {"success": False, "message": "metadata.json not found in folder"},
             status=500
         )
 
@@ -76,7 +67,7 @@ async def handle_next_video(request):
     # prepare response JSON
     response = {
         "success": True,
-        "video_name": vid_filename,
+        "folder_name": chosen,
         "metadata": metadata
     }
 
@@ -88,42 +79,32 @@ async def handle_next_video(request):
 
 async def handle_video_stream(request):
     """
-    aiohttp handler for GET /videos/{video_name}.
-    Streams the raw video file from the appropriate subfolder.
+    aiohttp handler for GET /videos/{folder_name}.
+    Streams the video.mp4 file from the given subfolder.
     """
-    video_name = request.match_info.get('video_name')
+    folder_name = request.match_info.get('folder_name')
+    folder = os.path.join(VIDEO_ROOT, folder_name)
+    video_path = os.path.join(folder, 'video.mp4')
 
-    # list and sort subdirs
-    try:
-        subdirs = sorted(
-            d for d in os.listdir(VIDEO_ROOT)
-            if os.path.isdir(os.path.join(VIDEO_ROOT, d))
-        )
-    except FileNotFoundError:
-        return web.Response(status=500, text="VIDEO_ROOT not found")
+    if not os.path.isdir(folder):
+        return web.Response(status=404, text="Folder not found")
+    if not os.path.isfile(video_path):
+        return web.Response(status=404, text="video.mp4 not found in folder")
 
-    # search all subfolders for matching video
-    for sub in subdirs:
-        candidate = os.path.join(VIDEO_ROOT, sub, video_name)
-        if os.path.isfile(candidate):
-            # found, stream it
-            return web.FileResponse(path=candidate)
-
-    # not found
-    return web.Response(status=404, text="Video not found")
+    return web.FileResponse(path=video_path)
 
 
 def start_server():
     app = web.Application()
     app.router.add_get("/next-video", handle_next_video)
-    app.router.add_get("/videos/{video_name}", handle_video_stream)
+    app.router.add_get("/videos/{folder_name}", handle_video_stream)
     web.run_app(app, port=8080, host="0.0.0.0")
 
 
 if __name__ == "__main__":
     server_proc = Process(target=start_server, daemon=True)
     server_proc.start()
-    print("🟢 aiohttp server listening on port 8080 globally")
+    print("🟢 aiohttp server listening on port 8080")
     try:
         server_proc.join()
     except KeyboardInterrupt:
