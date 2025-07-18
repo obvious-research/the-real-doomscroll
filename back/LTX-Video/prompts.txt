@@ -1,6 +1,0 @@
-# Add prompts here, one per line
-# Format: prompt|seed (seed is optional, will use default if not provided)
-# Examples:
-# naked woman on the beach
-# beautiful sunset over mountains|42
-# cat playing with yarn|123 
