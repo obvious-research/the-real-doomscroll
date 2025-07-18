@@ -23,21 +23,46 @@ from kokoro import KPipeline
 # --- Configuration Constants ---
 
 MASTER_TOPIC_LIST = [
-    "a beautiful woman walking on a sun-drenched beach", "an athletic man jogging through a misty forest at sunrise",
-    "a cute golden retriever puppy playing with a red ball", "a sleek supercar on a neon-lit city street at night",
-    "a majestic eagle soaring over a mountain range", "a cozy fireplace with crackling flames", "raindrops slowly trickling down a windowpane",
-    "a steaming cup of coffee on a wooden table", "a skilled chef expertly chopping vegetables", "a vibrant coral reef teeming with fish",
-    "a stunning woman in a red dress walking through Paris", "a powerful wave crashing against a rocky cliff", "a field of sunflowers swaying",
-    "The Fermi Paradox: Where are all the aliens?", "Cognitive Dissonance: Why we lie to ourselves", "The Great Emu War of Australia",
-    "Unusual Deep Sea Creatures and Bioluminescence", "The surprisingly complex history of coffee", "Stoic Philosophy for modern anxiety",
-    "The Carrington Event: The solar storm that almost sent us to the dark ages", "The psychology of procrastination",
-    "Ancient Roman engineering marvels like aqueducts", "The mysterious disappearance of the Library of Alexandria",
-    "The bizarre story of the Dutch Tulip Mania bubble", "The Viking sunstone: A mythical navigation tool", "Cleopatra's political genius",
-    "a futuristic cyberpunk city with flying vehicles", "a colossal dragon sleeping on a hoard of gold",
-    "an astronaut discovering an alien artifact on Mars", "a magical forest with glowing plants and creatures",
-    "a massive spaceship entering a wormhole", "a knight in shining armor facing a mythical beast",
-    "an abstract explosion of colorful ink in water", "a time-lapse of a flower blooming", "a dynamic dance of light and shadows",
-    "geometric patterns shifting and evolving hypnotically", "a macro shot of a snowflake forming",
+    # Simple, Direct Visuals
+    "car crash",
+    "people fighting",
+    "people kissing",
+    "people hugging",
+    "people crying",
+    "people laughing",
+    "indian street food vendor",
+    "woman in a red dress",
+    "man in a business suit with rolexes and champagne",
+    "woman in a bikini",
+    "blonde woman in a green dress with a big ass, dancing",
+    "podcast host talking in a microphone, surprised, laughing",
+    "black man dancing to music",
+    "black woman in a blue dress, dancing",
+    "black woman in a yellow bikini, dancing",
+    "korean guy eating ramen",
+    "korean mukbang",
+    "k pop artist",
+    "k pop group",
+    "k pop song",
+    "very cute black cats",
+    "very cute white cats",
+    "very cute black dogs",
+    "very cute white dogs",
+    "very cute tigers",
+    "very cute lions",
+    "very cute leopards",
+    "very cute cheetah",
+    "very cute panda",
+    "football celebration goal",
+    "basketball dunk",
+    "baseball home run",
+    "tennis player hitting a tennis ball and then having a trophy",
+    "woman in a red dress, dancing",
+    "woman in a yellow dress, dancing",
+    "woman in a blue dress, dancing",
+    "woman in a green dress, dancing",
+    "woman in a pink dress, dancing",
+    "woman in a purple dress, dancing",
 ]
 
 KOKORO_VOICES = [
@@ -50,20 +75,33 @@ PUNCTUATION_SET = {'.', ',', '?', '!', ';', ':'}
 MIN_SUBTITLE_DURATION_S = 0.1 # 100ms
 
 LLM_META_PROMPT_TEMPLATE = """
-You are an AI content creator. Based on a given topic, generate four distinct pieces of content.
+You are an AI content creator specializing in short, engaging viral videos. Your tiktok usually have twists that surprise the audience. Your task is to generate four pieces of content based on a given topic: a TTS script, a short description, a username, and a detailed video prompt.
 
 **Topic:**
 [CHOSEN_TOPIC]
 
 **Task:**
 
-1.  **Write a TTS Script:** Concise, <150 words, strong hook. Pure narration. No sound cues.
-2.  **Write a Short Video Description:** Catchy, <20 words. Include 1-2 relevant hashtags.
-3.  **Write a Video Prompt:** Single paragraph, <200 words. Describe one continuous shot. No editing terms.
-4.  **Generate a Username:** A single, catchy, lowercase word (e.g., `pixelprophet`, `historyhub`, `cosmicscribe`). No spaces or special characters.
+1.  **Write a TTS Script:**
+    *   Concise, under 50 words, with a strong hook. Pure narration for a voiceover.
+    *   **Crucial Rule:** No sound effects or music cues.
+
+2.  **Write a Short Video Description:**
+    *   A catchy, one-sentence description, perfect for a video title or social media post.
+    *   Should be under 20 words. Optionnaly include 1-2 relevant hashtags at the end (e.g., #science #history).
+
+3.  **Write a Username:**
+    *   A catchy, memorable username that fits the content style.
+    *   Should be 1-3 words, no spaces, can include numbers or underscores.
+
+4.  **Write a Video Prompt:**
+    *   The prompt is the peak of the story. It should be literally the most shocking and clickbait-y thing of the video. Usually the twist.  
+    *   A single, flowing paragraph under 100 words describing one continuous, uninterrupted camera shot.
+    *   Focus on literal descriptions of action, movement, appearance, and environment.
+    *   **Crucial Rule:** No editing terms like 'cut to' or 'final shot'.
 
 **Output Format:**
-Provide your response in four distinct parts, clearly separated: "### TTS Script", "### Short Description", "### Video Prompt", and "### Username".
+Provide your response in four distinct parts, clearly separated: "### TTS Script", "### Short Description", "### Username", and "### Video Prompt".
 """
 
 class AIContentFactory:
