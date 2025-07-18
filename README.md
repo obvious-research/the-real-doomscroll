@@ -40,7 +40,7 @@ It’s a **proof of concept**, not a product — a conversation starter to exami
 ## 🧠 How it works
 
 - 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) generates short TikTok-style stories, video prompts, and voiceover scripts.  
-- 🎬 **LTX-Video Generator** renders the video in seconds from the prompt.  
+- 🎬 **T2V** [`LTX-Video`](https://huggingface.co/Lightricks/LTX-Video) renders the video in seconds from the prompt.  
 - 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) creates an uncanny synthetic voice.  
 - 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) composes eerie, emotionally tuned background tracks.  
 - 📱 The result: A fresh AI-made TikTok in your feed.  
@@ -77,7 +77,7 @@ To let people **feel** what it’s like — and decide what we should do about i
 ## 🔧 Tech Stack
 
 - 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) — story + prompt generation  
-- 🎬 **Video**: [LTX Video](https://huggingface.co/Lightricks/LTX-Video) — fast text-to-video rendering  
+- 🎬 **Video**: [`LTX Video`](https://huggingface.co/Lightricks/LTX-Video) — fast text-to-video rendering  
 - 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) — voiceover generation  
 - 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) — AI-generated background sound  
 - 📈 **Loop**: Simple heuristic tracking of watch time for engagement-based content generation
