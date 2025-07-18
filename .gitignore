@@ -1,5 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+
+# Jupyter notebook checkpoints
+**/.ipynb_checkpoints/
+
+# Any folder or file with “checkpoints” in its name
+**/*checkpoints*/
+back/LTX-Video/generated_content/
 # dependencies
 front/node_modules
 /node_modules
