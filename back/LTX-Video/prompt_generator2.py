@@ -67,7 +67,7 @@ MASTER_TOPIC_LIST = [
 
 # UPDATED: Now includes hashtags in the description prompt.
 LLM_META_PROMPT_TEMPLATE = """
-You are an AI content creator specializing in short, engaging viral videos. Your tiktok usually have twists that surprise the audience. Your task is to generate three pieces of content based on a given topic: a TTS script, a short description and username, and a detailed video prompt.
+You are an AI content creator specializing in short, engaging viral videos. Your tiktok usually have twists that surprise the audience. Your task is to generate four pieces of content based on a given topic: a TTS script, a short description, a username, and a detailed video prompt.
 
 **Topic:**
 [CHOSEN_TOPIC]
@@ -82,21 +82,25 @@ You are an AI content creator specializing in short, engaging viral videos. Your
     *   A catchy, one-sentence description, perfect for a video title or social media post.
     *   Should be under 20 words. Optionnaly include 1-2 relevant hashtags at the end (e.g., #science #history).
 
-3.  **Write a Video Prompt:**
+3.  **Write a Username:**
+    *   A catchy, memorable username that fits the content style.
+    *   Should be 1-3 words, no spaces, can include numbers or underscores.
+
+4.  **Write a Video Prompt:**
     *   The prompt is the peak of the story. It should be literally the most shocking and clickbait-y thing of the video. Usually the twist.  
     *   A single, flowing paragraph under 100 words describing one continuous, uninterrupted camera shot.
     *   Focus on literal descriptions of action, movement, appearance, and environment.
     *   **Crucial Rule:** No editing terms like 'cut to' or 'final shot'.
 
 **Output Format:**
-Provide your response in three distinct parts, clearly separated: "### TTS Script", "### Short Description and username", and "### Video Prompt".
+Provide your response in four distinct parts, clearly separated: "### TTS Script", "### Short Description", "### Username", and "### Video Prompt".
 """
 
 class AIContentFactory:
-    def __init__(self, output_dir: str, interval: int, model_name: str, username: str):
+    def __init__(self, output_dir: str, interval: int, model_name: str):
         self.output_dir = Path(output_dir)
         self.interval = interval
-        self.username = username
+        self.username = "" # Initialize username to empty
         self.is_running = False
         self.model_name = model_name
         self.tokenizer = None
@@ -143,7 +147,7 @@ class AIContentFactory:
             print("❌ Failed to parse all required content. Skipping cycle.")
             self.video_counter -= 1; return
 
-        tts_script, short_desc, video_prompt = content
+        tts_script, short_desc, username, video_prompt = content
         print(f"✅ LLM generated all content parts.")
         
         print("🎙️ Generating TTS audio...")
@@ -154,14 +158,14 @@ class AIContentFactory:
         print("   ✅ TTS audio generated.")
 
         print(f"💾 Saving asset package to {self.output_dir / video_id}...")
-        self._save_assets(video_id, tts_script, short_desc, video_prompt, audio_data)
+        self._save_assets(video_id, tts_script, short_desc, username, video_prompt, audio_data)
         print("   ✅ Asset package saved.")
 
         simulated_watch_percentage = random.uniform(0.15, 0.99)
         print(f"\n📊 Simulating feedback... (Watch %: {simulated_watch_percentage:.2f})")
         self._update_taste_profile(topic, simulated_watch_percentage)
 
-    def _save_assets(self, video_id, tts_script, short_desc, video_prompt, audio_data):
+    def _save_assets(self, video_id, tts_script, short_desc, username, video_prompt, audio_data):
         """Saves all generated assets, including the metadata JSON file."""
         video_path = self.output_dir / video_id
         video_path.mkdir(exist_ok=True)
@@ -175,7 +179,7 @@ class AIContentFactory:
             "id": video_id,
             "video_path": final_video_path_str, # Placeholder for the final video
             "description": short_desc,
-            "username": self.username
+            "username": username
         }
         
         # Write all files
@@ -220,11 +224,12 @@ class AIContentFactory:
     def _parse_llm_output(self, raw_output: str) -> tuple:
         try:
             tts_part = raw_output.split("### Short Description")[0].replace("### TTS Script", "").strip()
-            desc_part = raw_output.split("### Video Prompt")[0].split("### Short Description")[1].strip()
+            desc_part = raw_output.split("### Username")[0].split("### Short Description")[1].strip()
+            username_part = raw_output.split("### Video Prompt")[0].split("### Username")[1].strip()
             prompt_part = raw_output.split("### Video Prompt")[1].strip()
-            return tts_part, desc_part, prompt_part
+            return tts_part, desc_part, username_part, prompt_part
         except IndexError:
-            return None, None, None
+            return None, None, None, None
 
     def _generate_tts(self, text: str):
         try:
@@ -257,7 +262,6 @@ def main():
     parser.add_argument("--output_dir", default="generated_content", help="Directory to save generated video assets.")
     parser.add_argument("--interval", type=int, default=45, help="Interval in seconds between generation cycles.")
     parser.add_argument("--model_name", default="Qwen/Qwen3-4B", help="Name of the Hugging Face model to use.")
-    parser.add_argument("--username", default="ai_content_creations", help="Username to include in the metadata.")
     
     args = parser.parse_args()
     
@@ -265,7 +269,6 @@ def main():
         output_dir=args.output_dir,
         interval=args.interval,
         model_name=args.model_name,
-        username=args.username
     )
     factory.run()
 
