@@ -2,6 +2,7 @@
   <img src="logo.png" alt="The Real Doomscroll Logo" width="300"/>
 </p>
 
+# 💀 The Real Doomscroll  
 ### *The TikTok you never asked for. Powered by AI. Built to steal your soul.*
 
 ---
