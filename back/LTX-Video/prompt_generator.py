@@ -143,6 +143,62 @@ class AIContentFactory:
             print("   ✅ TTS Pipeline loaded.")
         except Exception as e: print(f"❌ Critical Error loading TTS pipeline: {e}"); exit()
 
+    def _process_existing_watch_stats(self):
+        """Process all existing watch stats to build initial taste profile."""
+        print("📊 Processing existing watch statistics...")
+        
+        # Get all video folders in order
+        video_folders = sorted([d for d in self.output_dir.iterdir() if d.is_dir() and d.name.startswith('video_')])
+        
+        processed_count = 0
+        for video_folder in video_folders:
+            try:
+                video_num = int(video_folder.name.split('_')[1])
+                watch_stats_file = video_folder / "watch_stats.txt"
+                
+                if watch_stats_file.exists():
+                    print(f"   📈 Processing watch stats for video_{video_num:03d}")
+                    
+                    # Read watch percentage from file
+                    try:
+                        watch_percentage = float(watch_stats_file.read_text().strip())
+                        print(f"      Watch percentage: {watch_percentage:.2f}")
+                    except ValueError:
+                        print(f"      ⚠️ Invalid watch percentage in {watch_stats_file}")
+                        continue
+                    
+                    # Read metadata to get topic index
+                    metadata_file = video_folder / "metadata.json"
+                    if metadata_file.exists():
+                        try:
+                            metadata = json.loads(metadata_file.read_text())
+                            topic_index = metadata.get("topic_index")
+                            if topic_index is not None:
+                                topic = MASTER_TOPIC_LIST[topic_index]
+                                print(f"      Topic: {topic}")
+                                self._update_taste_profile(topic, watch_percentage)
+                                processed_count += 1
+                            else:
+                                print(f"      ⚠️ No topic_index found in metadata")
+                        except (json.JSONDecodeError, IndexError) as e:
+                            print(f"      ⚠️ Error reading metadata: {e}")
+                    else:
+                        print(f"      ⚠️ No metadata.json found")
+                    
+                else:
+                    print(f"   ⏳ No watch stats for video_{video_num:03d} (not watched yet)")
+                    
+            except (ValueError, IndexError) as e:
+                print(f"   ⚠️ Error processing folder {video_folder.name}: {e}")
+                continue
+        
+        print(f"   ✅ Processed {processed_count} existing watch statistics")
+        if self.user_taste_profile:
+            print("   🧠 Current taste profile:")
+            sorted_profile = sorted(self.user_taste_profile.items(), key=lambda i: i[1], reverse=True)
+            for topic, score in sorted_profile[:5]:  # Show top 5
+                print(f"      - {topic[:50]}: {score:.2f}")
+
     def _check_and_update_watch_stats(self):
         """Check for new watch_stats.txt files and update taste profile accordingly."""
         print("📊 Checking for new watch statistics...")
@@ -258,6 +314,7 @@ class AIContentFactory:
 
     def run(self):
         self._initialize_systems()
+        self._process_existing_watch_stats() # Process existing stats at startup
         print("\n" + "=" * 50)
         print("🤖 AI Content Factory (with Enhanced Subtitles)")
         print(f"📂 Outputting to: {self.output_dir}")
