@@ -4,8 +4,8 @@ Simple Master Coordinator for The Real Doomscroll
 By Obvious Research
 
 Now always serving an aiohttp endpoint at /next-video
-which returns JSON metadata + folder name, and a separate
-/videos/{folder_name} endpoint for streaming the video.mp4.
+which returns JSON metadata + folder name, and separate
+endpoints for streaming video, audio, and subtitles.
 """
 
 import os
@@ -94,17 +94,54 @@ async def handle_video_stream(request):
     return web.FileResponse(path=video_path)
 
 
+async def handle_audio_stream(request):
+    """
+    aiohttp handler for GET /audio/{folder_name}.
+    Streams the audio.wav file from the given subfolder.
+    """
+    folder_name = request.match_info.get('folder_name')
+    folder = os.path.join(VIDEO_ROOT, folder_name)
+    audio_path = os.path.join(folder, 'audio.wav')
+
+    if not os.path.isdir(folder):
+        return web.Response(status=404, text="Folder not found")
+    if not os.path.isfile(audio_path):
+        return web.Response(status=404, text="audio.wav not found in folder")
+
+    return web.FileResponse(path=audio_path)
+
+
+async def handle_subtitles_stream(request):
+    """
+    aiohttp handler for GET /subtitles/{folder_name}.
+    Streams the subtitles.vtt file from the given subfolder.
+    """
+    folder_name = request.match_info.get('folder_name')
+    folder = os.path.join(VIDEO_ROOT, folder_name)
+    subtitles_path = os.path.join(folder, 'subtitles.vtt')
+
+    if not os.path.isdir(folder):
+        return web.Response(status=404, text="Folder not found")
+    if not os.path.isfile(subtitles_path):
+        return web.Response(status=404, text="subtitles.vtt not found in folder")
+
+    return web.FileResponse(path=subtitles_path)
+
+
 def start_server():
+    """Initializes and starts the aiohttp web server."""
     app = web.Application()
     app.router.add_get("/next-video", handle_next_video)
     app.router.add_get("/videos/{folder_name}", handle_video_stream)
-    web.run_app(app, port=8080, host="0.0.0.0")
+    app.router.add_get("/audio/{folder_name}", handle_audio_stream)
+    app.router.add_get("/subtitles/{folder_name}", handle_subtitles_stream)
+    web.run_app(app, port=8081, host="0.0.0.0")
 
 
 if __name__ == "__main__":
     server_proc = Process(target=start_server, daemon=True)
     server_proc.start()
-    print("🟢 aiohttp server listening on port 8080")
+    print("🟢 aiohttp server listening on port 8081")
     try:
         server_proc.join()
     except KeyboardInterrupt:
