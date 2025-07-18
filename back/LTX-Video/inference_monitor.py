@@ -142,7 +142,10 @@ class VideoGenerator:
         self.device = get_device()
         print(f"💻 Using device: {self.device}")
 
-        self.output_dir = Path(self.config.output_path)
+        # Get the absolute path to the directory where the script is located
+        script_dir = Path(__file__).resolve().parent
+        # Create the output path relative to the script's directory
+        self.output_dir = script_dir / self.config.output_path
         self.output_dir.mkdir(parents=True, exist_ok=True)
         print(f"📁 Base output directory: {self.output_dir}")
 
