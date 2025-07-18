@@ -75,7 +75,7 @@ PUNCTUATION_SET = {'.', ',', '?', '!', ';', ':'}
 MIN_SUBTITLE_DURATION_S = 0.1 # 100ms
 
 LLM_META_PROMPT_TEMPLATE = """
-You are an AI content creator specializing in short, engaging viral videos. Your tiktok usually have twists that surprise the audience. Your task is to generate four pieces of content based on a given topic: a TTS script, a short description, a username, and a detailed video prompt.
+You are an AI content creator specializing in short, engaging viral videos. The videos are quite simple, they are made for a 25 years old white cis person with a short attention span. He is doomscrolling on this generated TikTok. Your tiktok usually have twists that surprise the audience. Your task is to generate four pieces of content based on a given topic: a TTS script, a short description, a username, and a detailed video prompt.
 
 **Topic:**
 [CHOSEN_TOPIC]
@@ -83,7 +83,7 @@ You are an AI content creator specializing in short, engaging viral videos. Your
 **Task:**
 
 1.  **Write a TTS Script:**
-    *   Concise, under 50 words, with a strong hook. Pure narration for a voiceover.
+    *   Concise, under 60 words, with a strong hook. Pure narration for a voiceover.
     *   **Crucial Rule:** No sound effects or music cues.
 
 2.  **Write a Short Video Description:**
