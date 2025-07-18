@@ -24,7 +24,7 @@ CURRENT_VIDEO = 0  # index into sorted subdirs
 async def handle_next_video(request):
     """
     aiohttp handler for GET /next-video.
-    Returns JSON containing the folder name + metadata.json contents.
+    Returns the raw contents of metadata.json for the next video.
     Increments CURRENT_VIDEO each request (wraps around).
     """
     global CURRENT_VIDEO
@@ -36,21 +36,21 @@ async def handle_next_video(request):
             if os.path.isdir(os.path.join(VIDEO_ROOT, d))
         )
     except FileNotFoundError:
-        return web.json_response({"success": False, "message": "VIDEO_ROOT not found"}, status=500)
+        return web.json_response({"error": "VIDEO_ROOT not found"}, status=500)
 
     if not subdirs:
-        return web.json_response({"success": False, "message": "No video subfolders"}, status=404)
+        return web.json_response({"error": "No video subfolders found"}, status=404)
 
     # choose current index, wrap around
     idx = CURRENT_VIDEO % len(subdirs)
-    chosen = subdirs[idx]
-    folder = os.path.join(VIDEO_ROOT, chosen)
+    chosen_folder_name = subdirs[idx]
+    folder_path = os.path.join(VIDEO_ROOT, chosen_folder_name)
 
     # locate metadata.json
-    meta_path = os.path.join(folder, "metadata.json")
+    meta_path = os.path.join(folder_path, "metadata.json")
     if not os.path.isfile(meta_path):
         return web.json_response(
-            {"success": False, "message": "metadata.json not found in folder"},
+            {"error": f"metadata.json not found in folder {chosen_folder_name}"},
             status=500
         )
 
@@ -60,21 +60,15 @@ async def handle_next_video(request):
             metadata = json.load(mf)
     except Exception as e:
         return web.json_response(
-            {"success": False, "message": f"Error reading metadata: {e}"},
+            {"error": f"Error reading or parsing metadata: {e}"},
             status=500
         )
 
-    # prepare response JSON
-    response = {
-        "success": True,
-        "folder_name": chosen,
-        "metadata": metadata
-    }
-
-    # increment for next request
+    # increment for the next request
     CURRENT_VIDEO += 1
 
-    return web.json_response(response)
+    # Return the metadata.json content directly
+    return web.json_response(metadata)
 
 
 async def handle_video_stream(request):
