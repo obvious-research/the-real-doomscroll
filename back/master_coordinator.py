@@ -123,7 +123,7 @@ def start_server():
 if __name__ == "__main__":
     server_proc = Process(target=start_server, daemon=True)
     server_proc.start()
-    print("🟢 aiohttp server listening on port 8080")
+    print("🟢 aiohttp server listening on port 8080 globally")
     try:
         server_proc.join()
     except KeyboardInterrupt:
