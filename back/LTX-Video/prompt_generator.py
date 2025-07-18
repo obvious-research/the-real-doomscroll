@@ -121,11 +121,11 @@ class AIContentFactory:
             # Get the highest video number
             max_video_num = max([int(d.name.split('_')[1]) for d in existing_videos])
             self.video_counter = max_video_num
-            self.last_processed_video = max_video_num
+            self.processed_videos = set()  # Track which videos have been processed for watch stats
             print(f"📁 Found {len(existing_videos)} existing videos, continuing from video_{self.video_counter + 1:03d}")
         else:
             self.video_counter = 0
-            self.last_processed_video = 0
+            self.processed_videos = set()
             print("📁 Starting fresh - no existing videos found")
 
     def _initialize_systems(self):
@@ -178,6 +178,7 @@ class AIContentFactory:
                                 print(f"      Topic: {topic}")
                                 self._update_taste_profile(topic, watch_percentage)
                                 processed_count += 1
+                                self.processed_videos.add(video_num)  # Mark as processed
                             else:
                                 print(f"      ⚠️ No topic_index found in metadata")
                         except (json.JSONDecodeError, IndexError) as e:
@@ -210,7 +211,7 @@ class AIContentFactory:
         for video_folder in video_folders:
             try:
                 video_num = int(video_folder.name.split('_')[1])
-                if video_num <= self.last_processed_video:
+                if video_num in self.processed_videos:
                     continue  # Already processed
                     
                 watch_stats_file = video_folder / "watch_stats.txt"
@@ -236,6 +237,7 @@ class AIContentFactory:
                                 print(f"      Topic: {topic}")
                                 self._update_taste_profile(topic, watch_percentage)
                                 new_stats_found = True
+                                self.processed_videos.add(video_num)  # Mark as processed
                             else:
                                 print(f"      ⚠️ No topic_index found in metadata")
                         except (json.JSONDecodeError, IndexError) as e:
@@ -243,7 +245,8 @@ class AIContentFactory:
                     else:
                         print(f"      ⚠️ No metadata.json found")
                     
-                    self.last_processed_video = video_num
+                else:
+                    print(f"   ⏳ No watch stats for video_{video_num:03d} (not watched yet)")
                     
             except (ValueError, IndexError) as e:
                 print(f"   ⚠️ Error processing folder {video_folder.name}: {e}")
