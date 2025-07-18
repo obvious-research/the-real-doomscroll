@@ -115,6 +115,7 @@ class AIContentFactory:
         self.user_taste_profile = {}
         self.recently_used_topics = deque(maxlen=5)
         self.output_dir.mkdir(exist_ok=True)
+        self.last_processed_video = 0  # Track the last video we processed watch stats for
 
     def _initialize_systems(self):
         print(f"🧠 Initializing systems...")
@@ -131,13 +132,72 @@ class AIContentFactory:
             print("   ✅ TTS Pipeline loaded.")
         except Exception as e: print(f"❌ Critical Error loading TTS pipeline: {e}"); exit()
 
+    def _check_and_update_watch_stats(self):
+        """Check for new watch_stats.txt files and update taste profile accordingly."""
+        print("📊 Checking for new watch statistics...")
+        
+        # Get all video folders in order
+        video_folders = sorted([d for d in self.output_dir.iterdir() if d.is_dir() and d.name.startswith('video_')])
+        
+        new_stats_found = False
+        for video_folder in video_folders:
+            try:
+                video_num = int(video_folder.name.split('_')[1])
+                if video_num <= self.last_processed_video:
+                    continue  # Already processed
+                    
+                watch_stats_file = video_folder / "watch_stats.txt"
+                if watch_stats_file.exists():
+                    print(f"   📈 Found watch stats for video_{video_num:03d}")
+                    
+                    # Read watch percentage from file
+                    try:
+                        watch_percentage = float(watch_stats_file.read_text().strip())
+                        print(f"      Watch percentage: {watch_percentage:.2f}")
+                    except ValueError:
+                        print(f"      ⚠️ Invalid watch percentage in {watch_stats_file}")
+                        continue
+                    
+                    # Read metadata to get topic index
+                    metadata_file = video_folder / "metadata.json"
+                    if metadata_file.exists():
+                        try:
+                            metadata = json.loads(metadata_file.read_text())
+                            topic_index = metadata.get("topic_index")
+                            if topic_index is not None:
+                                topic = MASTER_TOPIC_LIST[topic_index]
+                                print(f"      Topic: {topic}")
+                                self._update_taste_profile(topic, watch_percentage)
+                                new_stats_found = True
+                            else:
+                                print(f"      ⚠️ No topic_index found in metadata")
+                        except (json.JSONDecodeError, IndexError) as e:
+                            print(f"      ⚠️ Error reading metadata: {e}")
+                    else:
+                        print(f"      ⚠️ No metadata.json found")
+                    
+                    self.last_processed_video = video_num
+                    
+            except (ValueError, IndexError) as e:
+                print(f"   ⚠️ Error processing folder {video_folder.name}: {e}")
+                continue
+        
+        if not new_stats_found:
+            print("   📊 No new watch statistics found")
+        else:
+            print("   ✅ Watch statistics updated")
+
     def _run_generation_cycle(self):
+        # First, check for new watch stats before generating new content
+        self._check_and_update_watch_stats()
+        
         self.video_counter += 1
         video_id = f"video_{self.video_counter:03d}"
         print(f"--- Cycle {self.video_counter} | ID: {video_id} ---")
 
         topic, mode = self._select_topic()
-        print(f"🔍 Topic selected ({mode.upper()}): {topic}")
+        topic_index = MASTER_TOPIC_LIST.index(topic)
+        print(f"🔍 Topic selected ({mode.upper()}): {topic} (index: {topic_index})")
         self.recently_used_topics.append(topic)
         
         raw_llm_output = self._query_llm(topic)
@@ -164,14 +224,10 @@ class AIContentFactory:
         print("   ✅ SRT content created.")
 
         print(f"💾 Saving asset package to {self.output_dir / video_id}...")
-        self._save_assets(video_id, tts_script, short_desc, video_prompt, audio_data, chosen_voice, srt_content, username)
+        self._save_assets(video_id, tts_script, short_desc, video_prompt, audio_data, chosen_voice, srt_content, username, topic_index)
         print("   ✅ Asset package saved.")
 
-        simulated_watch_percentage = random.uniform(0.15, 0.99)
-        print(f"\n📊 Simulating feedback... (Watch %: {simulated_watch_percentage:.2f})")
-        self._update_taste_profile(topic, simulated_watch_percentage)
-
-    def _save_assets(self, video_id, tts_script, short_desc, video_prompt, audio_data, voice_used, srt_content, username):
+    def _save_assets(self, video_id, tts_script, short_desc, video_prompt, audio_data, voice_used, srt_content, username, topic_index):
         video_path = self.output_dir / video_id
         video_path.mkdir(exist_ok=True)
         final_video_path_str = str(video_path / "video.mp4").replace('\\', '/')
@@ -179,7 +235,8 @@ class AIContentFactory:
 
         metadata = {
             "id": video_id, "username": username, "description": short_desc,
-            "voice": voice_used, "video_path": final_video_path_str, "subtitle_path": subtitle_path_str
+            "voice": voice_used, "video_path": final_video_path_str, "subtitle_path": subtitle_path_str,
+            "topic_index": topic_index
         }
         
         (video_path / "metadata.json").write_text(json.dumps(metadata, indent=4), encoding='utf-8')
