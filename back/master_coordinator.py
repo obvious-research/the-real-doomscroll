@@ -17,7 +17,7 @@ from aiohttp import web
 # ───────────────────────────────────────────────────────────────
 # CONFIGURATION: point this at your root directory of video subfolders
 # ─────────────────────────────────────────────────────────────────
-VIDEO_ROOT = "path/to/your/video_folders"  # ← adjust this!
+VIDEO_ROOT = "/workspace/videos"  # ← adjust this!
 CURRENT_VIDEO = 0  # index into sorted subdirs
 
 
