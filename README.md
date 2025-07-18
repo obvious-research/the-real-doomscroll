@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="The Real Doomscroll Logo" width="300"/>
+</p>
+
 # 💀 The Real Doomscroll  
 ### *The TikTok you never asked for. Powered by AI. Built to steal your soul.*
 
@@ -5,61 +9,78 @@
 
 > **What if your feed knew you better than you know yourself?**  
 > What if it generated content faster than you could consume it?  
-> What if your mindless scrolling... was actually someone else's masterpiece?
+> **What if you couldn’t take your eyes off the screen — and it was all made just for you?**
+
+---
+
+<p align="center">
+  <img src="demo.gif" alt="The Real Doomscroll Demo" width="100%"/>
+</p>
+
+<p align="center">
+  <em>This is a full run of the app — the story, video prompt, text-to-speech, and music were all AI-generated.<br/>
+  What you see was tailored to the user’s viewing patterns in real-time, to maximize retention.</em>
+</p>
 
 ---
 
 ## 👁️ What is this?
 
-**The Real Doomscroll** is an AI-powered TikTok clone with *infinite*, *personalized*, *addictive* content — generated in real time by machines that don't sleep and don’t care about your mental health.
+**The Real Doomscroll** is an AI-powered TikTok clone with *infinite*, *personalized*, *addictive* content — generated in real time by machines that don’t sleep and don’t care about your mental health.
 
-This is a **2-day hackathon experiment** by [**Obvious**](#-about-obvious), the French art collective exploring the frontiers of artificial intelligence and its societal impact. It’s a **proof of concept** that critiques the accelerating race for human attention.
+This is the result of a **2-day hackathon experiment** by [**Obvious**](https://obvious.art), the French art collective exploring the frontiers of artificial intelligence and its impact on culture.  
+It’s a **proof of concept**, not a product — a conversation starter to examine where things might be heading.
 
-> In a world where video generators like **LTX Studio** can produce video faster than you can watch it,  
-> and where language models like **Qwen 1.7B** can design your next obsession in milliseconds...  
-> we asked ourselves:  
+> In a world where video generators can produce content faster than humans can watch,  
+> and where large language models can guess what you want before you know it yourself…  
 > **What happens when TikTok becomes a generative, reactive, infinite loop?**
 
 ---
 
 ## 🧠 How it works
 
-1. 🧠 **Qwen LLM** generates short TikTok-style narratives: a story + a matching video prompt + a matching voiceover.
-2. 🎬 **LTX Video Generator** turns the prompt into an actual short video.
-3. 🗣️ **Text-to-Speech** transforms the story into an eerie robotic voice.
-4. 📱 The result: A fresh AI-made TikTok in your feed.
-5. ⏱️ Your behavior — how long you watch vs skip — is fed back into the loop.
-6. 🔁 The AI learns what grabs your attention.
-7. 🧲 It tries again. Stronger. Creepier. Better.
-
-Repeat until your will breaks or your battery dies.
+- 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) generates short TikTok-style stories, video prompts, and voiceover scripts.  
+- 🎬 **LTX Video Generator** renders the video in seconds from the prompt.  
+- 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) creates an uncanny synthetic voice.  
+- 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) composes eerie, emotionally tuned background tracks.  
+- 📱 The result: A fresh AI-made TikTok in your feed.  
+- ⏱️ Your behavior — how long you watch vs skip — is fed back into the loop.  
+- 🔁 The AI adapts. **The scroll deepens.**
 
 ---
 
 ## 🎭 Why?
 
-Because **we’re artists.**  
-Because **we’re terrified.**  
-Because **this is where things are headed.**
+Because **we’re artists**.  
+And because **we’re optimists**.
 
-This is not a startup.  
-This is not a pitch deck.  
-This is not a call to raise your Series A.
+We believe artificial intelligence can and should be used for the benefit of humanity — to create, to explore, to imagine.  
+But with every powerful tool comes the risk of misuse.
 
-> **The Real Doomscroll** is an _artistic autopsy_ of social media in its final, AI-driven phase:  
-> a future where your attention is the only currency,  
-> and the algorithm is the only god.
+**The Real Doomscroll** is *not* a startup.  
+It’s *not* a product.  
+It’s an **artistic experiment** to explore the edges of what's coming.
 
-We made this because we **can**, and because one day someone else will — but won’t tell you it’s an artwork.
+We built it not out of fear — but to raise awareness.  
+To ask questions *before* others blindly build.  
+To show, not just speculate.  
+To let people **feel** what it’s like — and decide what we should do about it.
+
+> **Ban it?**  
+> **Regulate it?**  
+> **Use it differently?**  
+>  
+> Let’s talk.
 
 ---
 
 ## 🔧 Tech Stack
 
-- 🧠 **LLM**: [Qwen 1.7B](https://huggingface.co/Qwen/Qwen1.5-1.7B-Chat) (story + prompt generation)
-- 🎬 **Video**: [LTX Video Generator](https://www.ltx.ai/) (fast generative video)
-- 🗣️ **Voice**: Text-to-Speech pipeline
-- 📈 **Engagement loop**: Time-spent based content tuning
+- 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) — story + prompt generation  
+- 🎬 **Video**: [LTX Studio](https://www.ltx.ai/) — fast text-to-video rendering  
+- 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) — voiceover generation  
+- 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) — AI-generated background sound  
+- 📈 **Loop**: Simple heuristic tracking of watch time for engagement-based content generation
 
 ---
 
@@ -67,25 +88,17 @@ We made this because we **can**, and because one day someone else will — but w
 
 [**Obvious**](https://obvious.art) is a French trio of artists and researchers using AI to push the boundaries of creativity.
 
-We were the first to sell an AI-generated artwork at **Christie’s New York** in 2018. Since then, our work has been exhibited in major museums worldwide, and in collaborations with **Nike, Alpine**, and the **Opéra de Paris**.
+We were the first to sell an AI-generated artwork at **Christie’s New York** in 2018.  
+Since then, our work has been exhibited in major museums worldwide, and in collaborations with **Nike**, **Alpine**, and the **Opéra de Paris**.
 
 In 2023, we launched our own AI research lab with **Sorbonne University**, dedicated to inventing new tools for artistic creation.  
 In 2024, we visualized human imagination from MRI scans using AI — a project showcased in **Paris and Seoul**.
 
-Through our art, we explore both the **power** and the **dangers** of AI.  
-**The Real Doomscroll** is not a product.  
+We believe AI is **not the enemy**.  
 It’s a mirror.  
-Look closely.
+**What we do with it is what matters.**
 
----
-
-## 🚨 Warning
-
-> This is not satire.  
-> This is not fiction.  
-> This is what social media is becoming.
-
-If you’re building the future, at least know what you’re building.
+**The Real Doomscroll** is one such reflection.
 
 ---
 
@@ -97,6 +110,10 @@ If you’re building the future, at least know what you’re building.
 
 ## 📬 Contact
 
-We are [**Obvious**](https://obvious.art).  
-We turn algorithms into art — and sometimes, into nightmares.  
-Feel free to open an issue, or open your mind.
+We are [**Obvious**](https://obvious.art)  
+📸 [Instagram](https://www.instagram.com/obvious_art/)  
+🐦 [Twitter / X](https://x.com/obv_ious)  
+📧 hello.obvious@gmail.com
+
+We turn algorithms into art — and sometimes, into warnings.  
+**Feel free to open an issue, or open your mind.**
