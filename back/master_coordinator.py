@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple Master Coordinator for The Real Doomscroll
+By Obvious Research
 
 Handles communication between frontend and backend.
 All video generation logic is handled in LTX-Video folder.
