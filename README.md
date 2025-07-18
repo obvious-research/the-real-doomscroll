@@ -40,7 +40,7 @@ It’s a **proof of concept**, not a product — a conversation starter to exami
 ## 🧠 How it works
 
 - 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) generates short TikTok-style stories, video prompts, and voiceover scripts.  
-- 🎬 **T2V** [`LTX-Video`](https://huggingface.co/Lightricks/LTX-Video) renders the video in seconds from the prompt.  
+- 🎬 **T2V**: [`LTX-Video`](https://huggingface.co/Lightricks/LTX-Video) renders the video in seconds from the prompt.  
 - 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) creates an uncanny synthetic voice.  
 - 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) composes eerie, emotionally tuned background tracks.  
 - 📱 The result: A fresh AI-made TikTok in your feed.  
