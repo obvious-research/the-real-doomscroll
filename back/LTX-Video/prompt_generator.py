@@ -111,11 +111,22 @@ class AIContentFactory:
         self.is_running = False
         self.model_name = model_name
         self.tokenizer, self.model, self.tts_pipeline = None, None, None
-        self.video_counter = 0
         self.user_taste_profile = {}
         self.recently_used_topics = deque(maxlen=5)
         self.output_dir.mkdir(exist_ok=True)
-        self.last_processed_video = 0  # Track the last video we processed watch stats for
+        
+        # Detect existing videos and continue from there
+        existing_videos = sorted([d for d in self.output_dir.iterdir() if d.is_dir() and d.name.startswith('video_')])
+        if existing_videos:
+            # Get the highest video number
+            max_video_num = max([int(d.name.split('_')[1]) for d in existing_videos])
+            self.video_counter = max_video_num
+            self.last_processed_video = max_video_num
+            print(f"📁 Found {len(existing_videos)} existing videos, continuing from video_{self.video_counter + 1:03d}")
+        else:
+            self.video_counter = 0
+            self.last_processed_video = 0
+            print("📁 Starting fresh - no existing videos found")
 
     def _initialize_systems(self):
         print(f"🧠 Initializing systems...")
