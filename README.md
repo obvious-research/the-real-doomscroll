@@ -40,7 +40,7 @@ It’s a **proof of concept**, not a product — a conversation starter to exami
 ## 🧠 How it works
 
 - 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) generates short TikTok-style stories, video prompts, and voiceover scripts.  
-- 🎬 **LTX Video Generator** renders the video in seconds from the prompt.  
+- 🎬 **LTX-Video Generator** renders the video in seconds from the prompt.  
 - 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) creates an uncanny synthetic voice.  
 - 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) composes eerie, emotionally tuned background tracks.  
 - 📱 The result: A fresh AI-made TikTok in your feed.  
@@ -77,16 +77,18 @@ To let people **feel** what it’s like — and decide what we should do about i
 ## 🔧 Tech Stack
 
 - 🧠 **LLM**: [`Qwen/Qwen3-4B`](https://huggingface.co/Qwen/Qwen3-4B) — story + prompt generation  
-- 🎬 **Video**: [LTX Studio](https://www.ltx.ai/) — fast text-to-video rendering  
+- 🎬 **Video**: [LTX Video](https://huggingface.co/Lightricks/LTX-Video) — fast text-to-video rendering  
 - 🗣️ **TTS**: [`hexgrad/Kokoro-82M`](https://huggingface.co/hexgrad/Kokoro-82M) — voiceover generation  
 - 🎵 **Music**: [`ACE-Step`](https://github.com/ace-step/ACE-Step) — AI-generated background sound  
 - 📈 **Loop**: Simple heuristic tracking of watch time for engagement-based content generation
+
+Tested on a RTX Pro 6000 Blackwell
 
 ---
 
 ## 🖼️ About Obvious
 
-[**Obvious**](https://obvious.art) is a French trio of artists and researchers using AI to push the boundaries of creativity.
+[**Obvious**](https://obvious-art.com) is a French trio of artists and researchers using AI to push the boundaries of creativity.
 
 We were the first to sell an AI-generated artwork at **Christie’s New York** in 2018.  
 Since then, our work has been exhibited in major museums worldwide, and in collaborations with **Nike**, **Alpine**, and the **Opéra de Paris**.
@@ -110,7 +112,7 @@ It’s a mirror.
 
 ## 📬 Contact
 
-We are [**Obvious**](https://obvious.art)  
+We are [**Obvious**](https://obvious-art.com)  
 📸 [Instagram](https://www.instagram.com/obvious_art/)  
 🐦 [Twitter / X](https://x.com/obv_ious)  
 📧 hello.obvious@gmail.com
