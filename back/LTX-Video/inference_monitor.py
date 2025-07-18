@@ -1,3 +1,4 @@
+import gc
 import os
 import time
 import threading
@@ -6,9 +7,12 @@ from typing import Optional, List
 from dataclasses import dataclass, field
 from datetime import datetime
 import argparse
+import traceback
+import imageio
+import numpy as np
 
+# Assuming these imports are correctly set up in your project environment
 from ltx_video.inference import (
-    infer,
     InferenceConfig,
     load_pipeline_config,
     create_ltx_video_pipeline,
@@ -28,6 +32,7 @@ from ltx_video.models.autoencoders.causal_video_autoencoder import CausalVideoAu
 from ltx_video.models.transformers.transformer3d import Transformer3DModel
 from ltx_video.models.transformers.symmetric_patchifier import SymmetricPatchifier
 from ltx_video.models.autoencoders.latent_upsampler import LatentUpsampler
+
 from transformers import T5EncoderModel, T5Tokenizer
 from safetensors import safe_open
 import json
@@ -55,7 +60,7 @@ class MonitorConfig:
         metadata={"help": "Number of frames to generate in the output video"},
     )
     frame_rate: int = field(
-        default=30, metadata={"help": "Frame rate for the output video"}
+        default=18, metadata={"help": "Frame rate for the output video"}
     )
     offload_to_cpu: bool = field(
         default=False, metadata={"help": "Offloading unnecessary computations to CPU."}
@@ -237,6 +242,13 @@ class VideoGenerator:
         print("✅ Pipeline initialized successfully!")
         print("=" * 60)
 
+        # Explicitly clear CUDA cache and run garbage collection
+        print("🗑️  Clearing CUDA cache and collecting garbage...")
+        torch.cuda.empty_cache()
+        gc.collect()
+        print("✅ CUDA cache cleared.")
+        torch.cuda.empty_cache()
+
         self._validate_pipeline()
 
     def _validate_pipeline(self):
@@ -273,15 +285,17 @@ class VideoGenerator:
             print(f"⚠️  Pipeline validation failed: {e}")
             print("   Continuing anyway...")
 
-    def _save_video_path(self, video_path: str, prompt: str, seed: int, generation_time: float):
+    def _save_video_path(self, video_path: str, prompt: str, seed: int, gen_time: float, enc_time: float,
+                         total_time: float):
         """Save video path to a separate file with metadata."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(self.video_paths_file, "a") as f:
-            f.write(f"{timestamp} | {video_path} | Prompt: '{prompt}' | Seed: {seed} | Time: {generation_time:.2f}s\n")
+            f.write(
+                f"{timestamp} | {video_path} | Prompt: '{prompt}' | Seed: {seed} | Generation: {gen_time:.2f}s | Encoding: {enc_time:.2f}s | Total: {total_time:.2f}s\n")
 
     def _generate_video(self, prompt: str, seed: int, output_dir: Path) -> str:
         """Generate a video for the given prompt and save it to the specified directory."""
-        start_time = time.time()
+        total_start_time = time.time()
         detection_time = datetime.now().strftime("%H:%M:%S")
 
         print(f"\n🎬 Starting video generation at {detection_time}")
@@ -324,8 +338,12 @@ class VideoGenerator:
                 offload_to_cpu = self.config.offload_to_cpu and self._get_total_gpu_memory() < 30
 
             print(f"💾 Offload to CPU: {offload_to_cpu}")
-            print("🎨 Generating video frames...")
+            print("🎨 Generating video frames (inference)...")
 
+            generation_duration = 0
+
+            # --- Timing for Generation (Inference) ---
+            generation_start_time = time.time()
             try:
                 images = self.pipeline(
                     **self.pipeline_config,
@@ -349,7 +367,10 @@ class VideoGenerator:
                     enhance_prompt=False,
                 ).images
 
+                # --- End Timing for Generation ---
+                generation_duration = time.time() - generation_start_time
                 print(f"✅ Pipeline execution completed. Output shape: {images.shape}")
+                print(f"⏱️  Inference (Generation) time: {generation_duration:.2f} seconds")
 
             except Exception as pipeline_error:
                 print(f"❌ Pipeline execution failed:")
@@ -364,35 +385,40 @@ class VideoGenerator:
             pad_top:pad_bottom, pad_left:pad_right]
 
             print(f"✂️  Cropped images shape: {images.shape}")
-            print("💾 Saving video...")
-
-            import imageio
-            import numpy as np
+            print("💾 Encoding and saving video...")
 
             for i in range(images.shape[0]):
                 video_np = images[i].permute(1, 2, 3, 0).cpu().float().numpy()
                 video_np = (video_np * 255).astype(np.uint8)
                 fps = self.config.frame_rate
-                height, width = video_np.shape[1:3]
 
                 print(f"📹 Video tensor shape: {video_np.shape}, FPS: {fps}")
 
                 output_filename = output_dir / 'video.mp4'
 
+                # --- Timing for Encoding/Saving ---
+                encoding_start_time = time.time()
                 with imageio.get_writer(output_filename, fps=fps) as video:
                     for frame in video_np:
                         video.append_data(frame)
+                encoding_duration = time.time() - encoding_start_time
+                # --- End Timing for Encoding/Saving ---
 
-                generation_time = time.time() - start_time
+                total_function_time = time.time() - total_start_time
                 completion_time = datetime.now().strftime("%H:%M:%S")
 
                 print(f"✅ Video saved successfully!")
                 print(f"📁 Path: {output_filename}")
-                print(f"⏱️  Generation time: {generation_time:.2f} seconds")
+                print(f"⏱️  Encoding/Saving time: {encoding_duration:.2f} seconds")
+                print(f"⏱️  Total process time: {total_function_time:.2f} seconds")
                 print(f"🕐 Completed at: {completion_time}")
                 print("-" * 60)
 
-                self._save_video_path(str(output_filename), prompt, seed, generation_time)
+                self._save_video_path(str(output_filename), prompt, seed, generation_duration, encoding_duration,
+                                      total_function_time)
+
+                del video_np
+                del images
 
                 return str(output_filename)
 
@@ -401,7 +427,6 @@ class VideoGenerator:
             print(f"   Error type: {type(e).__name__}")
             print(f"   Error message: {str(e)}")
 
-            import traceback
             traceback.print_exc()
 
             if torch.cuda.is_available():
@@ -470,6 +495,9 @@ class VideoGenerator:
             self._generate_video(prompt, seed, output_dir)
         except Exception as e:
             print(f"❌ Unhandled error during video generation for '{prompt}': {e}")
+        finally:
+            gc.collect()
+            torch.cuda.empty_cache()
 
     def run(self):
         """Main monitoring and generation loop."""
@@ -518,10 +546,10 @@ def main():
     parser.add_argument("--pipeline_config", default="configs/ltxv-13b-0.9.8-distilled.yaml",
                         help="Path to the pipeline config file")
     parser.add_argument("--seed", type=int, default=171198, help="Default random seed for inference")
-    parser.add_argument("--height", type=int, default=704, help="Height of the output video frames")
-    parser.add_argument("--width", type=int, default=550, help="Width of the output video frames")
-    parser.add_argument("--num_frames", type=int, default=240, help="Number of frames to generate")
-    parser.add_argument("--frame_rate", type=int, default=30, help="Frame rate for the output video")
+    parser.add_argument("--height", type=int, default=672, help="Height of the output video frames")
+    parser.add_argument("--width", type=int, default=512, help="Width of the output video frames")
+    parser.add_argument("--num_frames", type=int, default=216, help="Number of frames to generate")
+    parser.add_argument("--frame_rate", type=int, default=24, help="Frame rate for the output video")
     parser.add_argument("--output_path", default="generated_content", help="Base directory for task folders")
     parser.add_argument("--negative_prompt", default="worst quality, inconsistent motion, blurry, jittery, distorted",
                         help="Negative prompt")
@@ -529,6 +557,9 @@ def main():
     parser.add_argument("--no_compile", action="store_true", help="Disable torch.compile optimization")
 
     args = parser.parse_args()
+
+    script_dir = Path(__file__).resolve().parent
+    args.pipeline_config = script_dir / args.pipeline_config
 
     config = MonitorConfig(
         pipeline_config=args.pipeline_config,

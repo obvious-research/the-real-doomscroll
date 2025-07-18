@@ -51,8 +51,8 @@ if __name__ == "__main__":
     # List of scripts to be launched
     scripts_to_launch = [
         "master_coordinator.py",
-        "inference_monitor.py",
-        "prompt_generator.py"
+        "LTX-Video/inference_monitor.py",
+        "LTX-Video/prompt_generator.py"
     ]
 
     # To launch the scripts sequentially, uncomment the following line:
